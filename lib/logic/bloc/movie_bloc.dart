@@ -6,20 +6,30 @@ import 'movie_event.dart';
 import 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
-  final TMDBMovieRepository movieRepository;
+  final TMDBMovieRepository _movieRepository;
 
-  MovieBloc(this.movieRepository) : super(MovieInitialState());
+  MovieBloc(this._movieRepository) : super(MovieInitialState());
 
   @override
   Stream<MovieState> mapEventToState(MovieEvent event) async* {
     if (event is FetchMoviesEvent) {
       yield MovieLoadingState();
       try {
-        final List<Movie> movies = await movieRepository.getMovies();
-        final List<Genre> genres = await movieRepository.getCategoryNames();
+        final List<Movie> movies = await _movieRepository.getMovies();
+        final List<Genre> genres = await _movieRepository.getCategoryNames();
         yield MovieLoadedState(movies, genres);
       } catch (e) {
         yield MovieErrorState('Failed to fetch movies');
+      }
+    } else if (event is NavigateToMovieDetailsEvent) {
+      yield MovieLoadingState();
+      try {
+        final movie = await _movieRepository.getMovieDetails(event.movieId);
+        final List<MovieReview> reviews =
+            await _movieRepository.getMovieReviews(event.movieId);
+        yield MovieDetailsScreenState(movie, reviews);
+      } catch (e) {
+        yield MovieErrorState('Failed to fetch movie details: $e');
       }
     }
   }

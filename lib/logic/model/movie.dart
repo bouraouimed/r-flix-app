@@ -17,7 +17,6 @@ class MovieResponse {
   }
 }
 
-
 class ProductionCompany {
   final int id;
   final String? logoPath;
@@ -41,7 +40,6 @@ class ProductionCompany {
   }
 }
 
-
 class ProductionCountry {
   final String iso31661;
   final String name;
@@ -58,7 +56,6 @@ class ProductionCountry {
     );
   }
 }
-
 
 class SpokenLanguage {
   final String englishName;
@@ -79,7 +76,6 @@ class SpokenLanguage {
     );
   }
 }
-
 
 class MovieDetailedResponse {
   final bool adult;
@@ -144,7 +140,8 @@ class MovieDetailedResponse {
           ? MovieCollection.fromJson(json['belongs_to_collection'])
           : null,
       budget: json['budget'],
-      genres: List<Genre>.from(json['genres'].map((genre) => Genre.fromJson(genre))),
+      genres: List<Genre>.from(
+          json['genres'].map((genre) => Genre.fromJson(genre))),
       homepage: json['homepage'],
       id: json['id'],
       imdbId: json['imdb_id'],
@@ -154,16 +151,19 @@ class MovieDetailedResponse {
       popularity: json['popularity'].toDouble(),
       posterPath: json['poster_path'],
       productionCompanies: List<ProductionCompany>.from(
-        json['production_companies'].map((company) => ProductionCompany.fromJson(company)),
+        json['production_companies']
+            .map((company) => ProductionCompany.fromJson(company)),
       ),
       productionCountries: List<ProductionCountry>.from(
-        json['production_countries'].map((country) => ProductionCountry.fromJson(country)),
+        json['production_countries']
+            .map((country) => ProductionCountry.fromJson(country)),
       ),
       releaseDate: json['release_date'],
       revenue: json['revenue'],
       runtime: json['runtime'],
       spokenLanguages: List<SpokenLanguage>.from(
-        json['spoken_languages'].map((language) => SpokenLanguage.fromJson(language)),
+        json['spoken_languages']
+            .map((language) => SpokenLanguage.fromJson(language)),
       ),
       status: json['status'],
       tagline: json['tagline'],
@@ -174,7 +174,6 @@ class MovieDetailedResponse {
     );
   }
 }
-
 
 class MovieCollection {
   final int id;
@@ -199,11 +198,10 @@ class MovieCollection {
   }
 }
 
-
 class Movie {
   final bool adult;
   final String backdropPath;
-  final List<int> genreIds;
+  final List<int>? genreIds;
   final int id;
   final String originalLanguage;
   final String originalTitle;
@@ -228,41 +226,39 @@ class Movie {
   final String? status;
   final String? tagline;
 
-
-  Movie({
-    required this.adult,
-    required this.backdropPath,
-    required this.genreIds,
-    required this.id,
-    required this.originalLanguage,
-    required this.originalTitle,
-    required this.overview,
-    required this.popularity,
-    required this.posterPath,
-    required this.releaseDate,
-    required this.title,
-    required this.video,
-    required this.voteAverage,
-    required this.voteCount,
-
-    this.belongsToCollection,
-    this.budget,
-    this.genres,
-    this.homepage,
-    this.productionCompanies,
-    this.productionCountries,
-    this.revenue,
-    this.runtime,
-    this.spokenLanguages,
-    this.status,
-    this.tagline
-  });
+  Movie(
+      {required this.adult,
+      required this.backdropPath,
+      this.genreIds,
+      required this.id,
+      required this.originalLanguage,
+      required this.originalTitle,
+      required this.overview,
+      required this.popularity,
+      required this.posterPath,
+      required this.releaseDate,
+      required this.title,
+      required this.video,
+      required this.voteAverage,
+      required this.voteCount,
+      this.belongsToCollection,
+      this.budget,
+      this.genres,
+      this.homepage,
+      this.productionCompanies,
+      this.productionCountries,
+      this.revenue,
+      this.runtime,
+      this.spokenLanguages,
+      this.status,
+      this.tagline});
 
   factory Movie.fromJson(Map<String, dynamic> json) {
     return Movie(
       adult: json['adult'],
       backdropPath: json['backdrop_path'],
-      genreIds: List<int>.from(json['genre_ids']),
+      genreIds:
+          json['genre_ids'] != null ? List<int>.from(json['genre_ids']) : [],
       id: json['id'],
       originalLanguage: json['original_language'],
       originalTitle: json['original_title'],
@@ -274,30 +270,40 @@ class Movie {
       video: json['video'],
       voteAverage: json['vote_average'].toDouble(),
       voteCount: json['vote_count'],
-
       belongsToCollection: json['belongs_to_collection'] != null
           ? MovieCollection.fromJson(json['belongs_to_collection'])
           : null,
       budget: json['budget'] ?? 0,
-      genres: json['genres'] != null ? List<Genre>.from(json['genres'].map((genre) => Genre.fromJson(genre))): null,
+      genres: json['genres'] != null
+          ? List<Genre>.from(
+              json['genres'].map((genre) => Genre.fromJson(genre)))
+          : null,
       homepage: json['homepage'] ?? '',
-      productionCompanies: json['production_companies'] != null ? List<ProductionCompany>.from(
-        json['production_companies'].map((company) => ProductionCompany.fromJson(company)),
-      ): null,
-      productionCountries: json['production_countries'] != null ? List<ProductionCountry>.from(
-        json['production_countries'].map((country) => ProductionCountry.fromJson(country)),
-      ): null,
+      productionCompanies: json['production_companies'] != null
+          ? List<ProductionCompany>.from(
+              json['production_companies']
+                  .map((company) => ProductionCompany.fromJson(company)),
+            )
+          : null,
+      productionCountries: json['production_countries'] != null
+          ? List<ProductionCountry>.from(
+              json['production_countries']
+                  .map((country) => ProductionCountry.fromJson(country)),
+            )
+          : null,
       revenue: json['revenue'] ?? 0,
       runtime: json['runtime'] ?? 0,
-      spokenLanguages: json['spoken_languages'] != null ? List<SpokenLanguage>.from(
-        json['spoken_languages'].map((language) => SpokenLanguage.fromJson(language)),
-      ): null,
+      spokenLanguages: json['spoken_languages'] != null
+          ? List<SpokenLanguage>.from(
+              json['spoken_languages']
+                  .map((language) => SpokenLanguage.fromJson(language)),
+            )
+          : null,
       status: json['status'] ?? '',
       tagline: json['tagline'] ?? '',
     );
   }
 }
-
 
 class GenreResponse {
   final List<Genre> results;
@@ -315,7 +321,7 @@ class GenreResponse {
   }
 }
 
-class Genre{
+class Genre {
   final int id;
   final String name;
 
@@ -325,11 +331,90 @@ class Genre{
     return Genre(id: json['id'], name: json['name']);
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name
-  };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name};
 
   List<Object?> get props => [id, name];
+}
 
+class MovieReviewResponse {
+  final int id;
+  final int page;
+  final List<MovieReview> results;
+  final int totalPages;
+  final int totalResults;
+
+  MovieReviewResponse({
+    required this.id,
+    required this.page,
+    required this.results,
+    required this.totalPages,
+    required this.totalResults,
+  });
+
+  factory MovieReviewResponse.fromJson(Map<String, dynamic> json) {
+    return MovieReviewResponse(
+      id: json['id'],
+      page: json['page'],
+      results: List<MovieReview>.from(
+        json['results'].map((result) => MovieReview.fromJson(result)),
+      ),
+      totalPages: json['total_pages'],
+      totalResults: json['total_results'],
+    );
+  }
+}
+
+class MovieReview {
+  final String author;
+  final AuthorDetails authorDetails;
+  final String content;
+  final String createdAt;
+  final String id;
+  final String updatedAt;
+  final String url;
+
+  MovieReview({
+    required this.author,
+    required this.authorDetails,
+    required this.content,
+    required this.createdAt,
+    required this.id,
+    required this.updatedAt,
+    required this.url,
+  });
+
+  factory MovieReview.fromJson(Map<String, dynamic> json) {
+    return MovieReview(
+      author: json['author'],
+      authorDetails: AuthorDetails.fromJson(json['author_details']),
+      content: json['content'],
+      createdAt: json['created_at'],
+      id: json['id'],
+      updatedAt: json['updated_at'],
+      url: json['url'],
+    );
+  }
+}
+
+class AuthorDetails {
+  final String name;
+  final String username;
+  final String? avatarPath; // Nullable
+  final double? rating;
+
+  AuthorDetails({
+    required this.name,
+    required this.username,
+    this.avatarPath,
+    this.rating,
+  });
+
+  factory AuthorDetails.fromJson(Map<String, dynamic> json) {
+    return AuthorDetails(
+      name: json['name'],
+      username: json['username'],
+      avatarPath: json['avatar_path'],
+      rating: json['rating']?? 0.toDouble(),
+    );
+  }
 }

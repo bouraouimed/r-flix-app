@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:r_flix_app/presentation/screens/movie_details_screen.dart';
 
+import '../../constants/constants.dart';
 import '../../logic/bloc/movie_bloc.dart';
 import '../../logic/bloc/movie_event.dart';
 import '../../logic/bloc/movie_state.dart';
@@ -68,50 +70,61 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildMovieList(List<Movie> movies, List<Genre> genres) {
     return ListView.builder(
-      itemCount: movies.length,
+      itemCount:
+          movies.length > MAX_MOVIES_LENGTH ? MAX_MOVIES_LENGTH : movies.length,
       itemBuilder: (context, index) {
         final movie = movies[index];
 
         return Card(
           margin: EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Movie Poster
-              Image.network(
-                'https://image.tmdb.org/t/p/w200${movie.posterPath}',
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              // Movie Title
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  movie.title,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieDetailsScreen(movie.id),
+                ),
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Movie Poster
+                Image.network(
+                  'https://image.tmdb.org/t/p/w200${movie.posterPath}',
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                // Movie Title
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    movie.title,
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-              // Year of Release
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  'Release Year: ${movie.releaseDate.substring(0, 4)}',
-                  style: TextStyle(fontSize: 16.0),
+                // Year of Release
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    'Release Year: ${movie.releaseDate.substring(0, 4)}',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
                 ),
-              ),
-              // Genres
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  'Genres: ${_getGenreNames(movie.genreIds, genres)}',
-                  style: TextStyle(fontSize: 16.0),
+                // Genres
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    'Genres: ${_getGenreNames(movie.genreIds ?? [], genres)}',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

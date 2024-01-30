@@ -25,3 +25,16 @@ const String GET_MOVIES_GENRES_API =
 // list movies API
 const String GET_FAVORITE_MOVIES_URL =
     '$TMDB_BASE_URL/movie/popular?language=en-US&page=1';
+
+// movie details
+const String GET_MOVIE_DETAILS_URL = '$TMDB_BASE_URL/movie/%ID?language=en-US';
+
+// movie reviews
+const String GET_MOVIE_REVIEWS_URL =
+    '$TMDB_BASE_URL/movie/%ID/reviews?language=en-US&page=1';
+
+// Max number of reviews to be displayed
+const int MAX_REVIEWS_COUNT = 5;
+
+// Number of items to display in the movies list
+const int MAX_MOVIES_LENGTH = 40 ;

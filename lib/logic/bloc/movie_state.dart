@@ -23,6 +23,13 @@ class MovieLoadedState extends MovieState {
   List<Object?> get props => [movies, genres];
 }
 
+class MovieDetailsScreenState extends MovieState {
+  final Movie movie;
+  final List<MovieReview> reviews;
+
+  MovieDetailsScreenState(this.movie, this.reviews);
+}
+
 class MovieErrorState extends MovieState {
   final String error;
 

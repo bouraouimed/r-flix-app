@@ -16,23 +16,28 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late MovieBloc _movieBloc;
   late List<Movie> _movies = <Movie>[];
   late List<Genre> _genres = <Genre>[];
+  late List<Movie> _searchSuggestions = <Movie>[];
+
   late List<RatedMovie> _userRatedMoviesIds = <RatedMovie>[];
 
   bool _isLoading = true;
   String _errorMsg = '';
   late String _selectedButton = 'Popular'; // Default selected button
 
+  late TextEditingController? _searchController;
+
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
   }
 
   @override
   void dispose() {
     super.dispose();
+    _searchController?.dispose();
   }
 
   @override
@@ -77,8 +82,16 @@ class _HomePageState extends State<HomePage> {
               _genres = state.genres;
               _userRatedMoviesIds = state.UserRatedMoviesIds;
             });
-          }
-          else if (state is MovieRatedState) {
+          } else if (state is MovieSearchState) {
+            setState(() {
+              _isLoading = false;
+              _errorMsg = '';
+              _movies = state.searchResults;
+              _searchSuggestions = state.suggestions;
+              _genres = state.genres;
+              _userRatedMoviesIds = state.UserRatedMoviesIds;
+            });
+          } else if (state is MovieRatedState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content:
                     Text('Movie ${state.movieId} rated to ${state.rate}')));
@@ -97,6 +110,7 @@ class _HomePageState extends State<HomePage> {
           return Column(
             children: [
               _buildButtonsRow(context),
+              _buildSearchBar(context),
               Expanded(
                 child: _buildMovieList(),
               ),
@@ -154,6 +168,26 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: _selectedButton == buttonText ? Colors.amber : null,
       ),
       child: Text(buttonText),
+    );
+  }
+
+  Widget _buildSearchBar(BuildContext context) {
+    final movieBloc = BlocProvider.of<MovieBloc>(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(children: [
+        TextField(
+          controller: _searchController,
+          onChanged: (query) {
+            movieBloc.add(SearchTextChanged(query));
+          },
+          decoration: InputDecoration(
+            labelText: 'Search for movies...',
+            prefixIcon: Icon(Icons.search),
+          ),
+        ),
+      ]),
     );
   }
 

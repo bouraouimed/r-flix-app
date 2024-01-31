@@ -34,5 +34,13 @@ class DeleteRateMovieEvent extends MovieEvent {
   DeleteRateMovieEvent(this.movieId);
 }
 
+class SearchTextChanged extends MovieEvent {
+  final String query;
+
+  SearchTextChanged(this.query);
+
+  @override
+  List<Object> get props => [query];
+}
 
 

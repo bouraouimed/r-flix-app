@@ -74,6 +74,18 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         yield MovieRatingErrorState(
             event.movieId, 'Failed to rate movie details: $e');
       }
+    } else if (event is SearchTextChanged){
+      final List<Movie> searchResults = await _movieRepository.searchMovies(event.query.toString());
+      final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMoviesIds();
+
+      final List<Genre> genres = await _movieRepository.getCategoryNames();
+
+      final suggestions = searchResults
+          .where((movie) => movie.title.contains(event.query))
+          .toList();
+
+      yield MovieSearchState(suggestions, searchResults, genres, ratedMoviesIds);
+
     }
   }
 }

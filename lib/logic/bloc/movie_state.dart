@@ -49,6 +49,19 @@ class UserRatedMoviesLoadedState extends MovieState {
   List<Object?> get props => [userRatedMovies, genres, UserRatedMoviesIds];
 }
 
+class MovieSearchState extends MovieState {
+  final List<Movie> suggestions;
+  final List<Movie> searchResults;
+  final List<Genre> genres;
+  final List<RatedMovie> UserRatedMoviesIds;
+
+  const MovieSearchState(this.suggestions, this.searchResults, this.genres,
+      this.UserRatedMoviesIds);
+
+  @override
+  List<Object> get props =>
+      [suggestions, searchResults, genres, UserRatedMoviesIds];
+}
 
 class MovieDetailsScreenState extends MovieState {
   final Movie movie;
@@ -59,7 +72,6 @@ class MovieDetailsScreenState extends MovieState {
 
   @override
   List<Object?> get props => [movie, reviews, ratedMovies];
-
 }
 
 class MovieRatedState extends MovieState {
@@ -70,7 +82,6 @@ class MovieRatedState extends MovieState {
 
   @override
   List<Object?> get props => [movieId, rate];
-
 }
 
 class MovieRateDeletedState extends MovieState {
@@ -80,7 +91,6 @@ class MovieRateDeletedState extends MovieState {
 
   @override
   List<Object?> get props => [movieId];
-
 }
 
 class MovieRatingErrorState extends MovieState {

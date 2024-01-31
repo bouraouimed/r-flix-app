@@ -11,6 +11,9 @@ abstract class MovieRepository {
 
   Future<List<Movie>> getUserRatedMovies();
 
+  Future<List<Movie>> searchMovies(String query);
+
+
   Future<List<Genre>> getCategoryNames();
 
   Future<Movie> getMovieDetails(int id);
@@ -65,6 +68,35 @@ class TMDBMovieRepository implements MovieRepository {
     } catch (e) {
       // Handle exceptions
       throw Exception('Error: $e');
+    }
+  }
+
+  Future<List<Movie>> searchMovies(String query) async {
+    try {
+      String search_api_url = SEARCH_MOVIES_URL.replaceAll('%QUERY', query.toString());
+      final response = await http.get(
+        Uri.parse(search_api_url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final MovieResponse movieResponse = MovieResponse.fromJson(data);
+        return movieResponse.results;
+
+      } else if (response.statusCode == 404 ) {
+        return <Movie>[];
+      }
+      else {
+        // Handle error
+        throw Exception('Failed to load movies');
+      }
+    } catch (e) {
+      // Handle exceptions by returning empty query
+      return <Movie>[];
     }
   }
 

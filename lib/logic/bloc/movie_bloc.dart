@@ -12,18 +12,30 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   @override
   Stream<MovieState> mapEventToState(MovieEvent event) async* {
-    if (event is FetchMoviesEvent) {
+    if (event is FetchPopularMoviesEvent) {
       yield MovieLoadingState();
       try {
-        final List<Movie> movies = await _movieRepository.getMovies();
-        final List<RatedMovie> ratedMovies = await _movieRepository.getRatedMovies();
+        final List<Movie> popularMovies = await _movieRepository.getPopularMovies();
+        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMovies();
 
         final List<Genre> genres = await _movieRepository.getCategoryNames();
-        yield MovieLoadedState(movies, genres, ratedMovies);
+        yield PopularMoviesLoadedState(popularMovies, genres, ratedMoviesIds);
       } catch (e) {
         yield MovieErrorState('Failed to fetch movies');
       }
-    } else if (event is NavigateToMovieDetailsEvent) {
+    } else if(event is FetchTopRatedMoviesEvent) {
+      yield MovieLoadingState();
+      try {
+        final List<Movie> topRatedMovies = await _movieRepository.getTopRatedMovies();
+        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMovies();
+
+        final List<Genre> genres = await _movieRepository.getCategoryNames();
+        yield TopRatedMoviesLoadedState(topRatedMovies, genres, ratedMoviesIds);
+      } catch (e) {
+        yield MovieErrorState('Failed to fetch movies');
+      }
+    }
+    else if (event is NavigateToMovieDetailsEvent) {
       yield MovieLoadingState();
       try {
         final movie = await _movieRepository.getMovieDetails(event.movieId);

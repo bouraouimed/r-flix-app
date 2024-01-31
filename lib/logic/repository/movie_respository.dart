@@ -5,7 +5,9 @@ import '../../constants/constants.dart';
 import '../model/movie.dart';
 
 abstract class MovieRepository {
-  Future<List<Movie>> getMovies();
+  Future<List<Movie>> getPopularMovies();
+
+  Future<List<Movie>> getTopRatedMovies();
 
   Future<List<Genre>> getCategoryNames();
 
@@ -16,10 +18,34 @@ class TMDBMovieRepository implements MovieRepository {
   TMDBMovieRepository();
 
   @override
-  Future<List<Movie>> getMovies() async {
+  Future<List<Movie>> getPopularMovies() async {
     try {
       final response = await http.get(
         Uri.parse(GET_FAVORITE_MOVIES_URL),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final MovieResponse movieResponse = MovieResponse.fromJson(data);
+        return movieResponse.results;
+      } else {
+        // Handle error
+        throw Exception('Failed to load movies');
+      }
+    } catch (e) {
+      // Handle exceptions
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<List<Movie>> getTopRatedMovies() async {
+    try {
+      final response = await http.get(
+        Uri.parse(GET_TOP_RATED_MOVIES_URL),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',

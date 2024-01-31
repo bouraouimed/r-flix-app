@@ -16,12 +16,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late MovieBloc _movieBloc;
   late List<Movie> _movies = <Movie>[];
   late List<Genre> _genres = <Genre>[];
-  late List<RatedMovie> _userRatedMovies = <RatedMovie>[];
+  late List<RatedMovie> _userRatedMoviesIds = <RatedMovie>[];
 
   bool _isLoading = true;
   String _errorMsg = '';
+  late String _selectedButton = 'Popular'; // Default selected button
 
   @override
   void initState() {
@@ -42,7 +44,7 @@ class _HomePageState extends State<HomePage> {
       body: BlocProvider(
         create: (_) => MovieBloc(TMDBMovieRepository())
           ..add(
-            FetchMoviesEvent(),
+            FetchPopularMoviesEvent(),
           ),
         child: BlocListener<MovieBloc, MovieState>(listener: (context, state) {
           if (state is MovieLoadingState) {
@@ -50,14 +52,22 @@ class _HomePageState extends State<HomePage> {
             _errorMsg = '';
             _movies = <Movie>[];
             _genres = <Genre>[];
-            _userRatedMovies = <RatedMovie>[];
-          } else if (state is MovieLoadedState) {
+            _userRatedMoviesIds = <RatedMovie>[];
+          } else if (state is PopularMoviesLoadedState) {
             setState(() {
               _isLoading = false;
               _errorMsg = '';
-              _movies = state.movies;
+              _movies = state.popularMovies;
               _genres = state.genres;
-              _userRatedMovies = state.ratedMovies;
+              _userRatedMoviesIds = state.ratedMovies;
+            });
+          } else if (state is TopRatedMoviesLoadedState) {
+            setState(() {
+              _isLoading = false;
+              _errorMsg = '';
+              _movies = state.topRatedMovies;
+              _genres = state.genres;
+              _userRatedMoviesIds = state.ratedMovies;
             });
           } else if (state is MovieRatedState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -75,7 +85,14 @@ class _HomePageState extends State<HomePage> {
                 .showSnackBar(SnackBar(content: Text('Unable to rate movie')));
           }
         }, child: BlocBuilder<MovieBloc, MovieState>(builder: (context, state) {
-          return _buildMovieList();
+          return Column(
+            children: [
+              _buildButtonsRow(context),
+              Expanded(
+                child: _buildMovieList(),
+              ),
+            ],
+          );
         })),
       ),
       // ),
@@ -90,6 +107,45 @@ class _HomePageState extends State<HomePage> {
             .name)
         .toList()
         .join(', ');
+  }
+
+  Widget _buildButtonsRow(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildButton('Popular', context),
+          _buildButton('Top-Rated', context),
+          _buildButton('My Ratings', context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(String buttonText, BuildContext context) {
+    final movieBloc = BlocProvider.of<MovieBloc>(context);
+
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          _selectedButton = buttonText;
+        });
+
+        // Fetch data based on the selected button
+        if (_selectedButton == 'Popular') {
+          movieBloc.add(FetchPopularMoviesEvent());
+        } else if (_selectedButton == 'Top-Rated') {
+          movieBloc.add(FetchTopRatedMoviesEvent());
+        } else if (_selectedButton == 'My Ratings') {
+          movieBloc.add(FetchTopRatedMoviesEvent());
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _selectedButton == buttonText ? Colors.amber : null,
+      ),
+      child: Text(buttonText),
+    );
   }
 
   Widget _buildMovieList() {
@@ -155,7 +211,7 @@ class _HomePageState extends State<HomePage> {
                     MovieRating(
                       movie: movie,
                       actionsExtend: true,
-                      userRatedMovies: _userRatedMovies,
+                      userRatedMovies: _userRatedMoviesIds,
                     ),
                     SizedBox(height: 16.0),
                   ],

@@ -2,9 +2,14 @@ abstract class MovieEvent {
   const MovieEvent();
 }
 
-class FetchMoviesEvent extends MovieEvent {
+class FetchPopularMoviesEvent extends MovieEvent {
   List<Object?> get props => [];
 }
+
+class FetchTopRatedMoviesEvent extends MovieEvent {
+  List<Object?> get props => [];
+}
+
 
 class NavigateToMovieDetailsEvent extends MovieEvent {
   final int movieId;

@@ -24,9 +24,13 @@ const String TMDB_LOGIN_AUTHORIZATION_TOKEN =
 const String GET_MOVIES_GENRES_API =
     'https://api.themoviedb.org/3/genre/movie/list?language=en';
 
-// list movies API
+// list of popular movies
 const String GET_FAVORITE_MOVIES_URL =
     '$TMDB_BASE_URL/movie/popular?language=en-US&page=1';
+
+// list of popular movies
+const String  GET_TOP_RATED_MOVIES_URL =
+    '$TMDB_BASE_URL/movie/top_rated?language=en-US&page=1';
 
 // list of rated movies API
 const String GET_RATED_MOVIES_URL =

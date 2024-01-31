@@ -13,16 +13,30 @@ class MovieInitialState extends MovieState {}
 
 class MovieLoadingState extends MovieState {}
 
-class MovieLoadedState extends MovieState {
-  final List<Movie> movies;
+class PopularMoviesLoadedState extends MovieState {
+  final List<Movie> popularMovies;
   final List<Genre> genres;
-  List<RatedMovie> ratedMovies;
+  final List<RatedMovie> ratedMovies;
 
-  MovieLoadedState(this.movies, this.genres, this.ratedMovies);
+  const PopularMoviesLoadedState(
+      this.popularMovies, this.genres, this.ratedMovies);
 
   @override
-  List<Object?> get props => [movies, genres, ratedMovies];
+  List<Object?> get props => [popularMovies, genres, ratedMovies];
 }
+
+class TopRatedMoviesLoadedState extends MovieState {
+  final List<Movie> topRatedMovies;
+  final List<Genre> genres;
+  final List<RatedMovie> ratedMovies;
+
+  const TopRatedMoviesLoadedState(
+      this.topRatedMovies, this.genres, this.ratedMovies);
+
+  @override
+  List<Object?> get props => [topRatedMovies, genres, ratedMovies];
+}
+
 
 class MovieDetailsScreenState extends MovieState {
   final Movie movie;
@@ -30,6 +44,10 @@ class MovieDetailsScreenState extends MovieState {
   List<RatedMovie> ratedMovies;
 
   MovieDetailsScreenState(this.movie, this.reviews, this.ratedMovies);
+
+  @override
+  List<Object?> get props => [movie, reviews, ratedMovies];
+
 }
 
 class MovieRatedState extends MovieState {
@@ -37,14 +55,21 @@ class MovieRatedState extends MovieState {
   final double rate;
 
   MovieRatedState(this.movieId, this.rate);
+
+  @override
+  List<Object?> get props => [movieId, rate];
+
 }
 
 class MovieRateDeletedState extends MovieState {
   final int movieId;
 
   MovieRateDeletedState(this.movieId);
-}
 
+  @override
+  List<Object?> get props => [movieId];
+
+}
 
 class MovieRatingErrorState extends MovieState {
   final String error;
@@ -53,7 +78,7 @@ class MovieRatingErrorState extends MovieState {
   MovieRatingErrorState(this.movieId, this.error);
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [error, movieId];
 }
 
 class MovieErrorState extends MovieState {

@@ -11,3 +11,19 @@ class NavigateToMovieDetailsEvent extends MovieEvent {
 
   NavigateToMovieDetailsEvent(this.movieId);
 }
+
+class RateMovieEvent extends MovieEvent {
+  final int movieId;
+  final double rate;
+
+  RateMovieEvent(this.movieId, this.rate);
+}
+
+class DeleteRateMovieEvent extends MovieEvent {
+  final int movieId;
+
+  DeleteRateMovieEvent(this.movieId);
+}
+
+
+

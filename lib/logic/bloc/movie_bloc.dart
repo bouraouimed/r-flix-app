@@ -16,8 +16,10 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       yield MovieLoadingState();
       try {
         final List<Movie> movies = await _movieRepository.getMovies();
+        final List<RatedMovie> ratedMovies = await _movieRepository.getRatedMovies();
+
         final List<Genre> genres = await _movieRepository.getCategoryNames();
-        yield MovieLoadedState(movies, genres);
+        yield MovieLoadedState(movies, genres, ratedMovies);
       } catch (e) {
         yield MovieErrorState('Failed to fetch movies');
       }
@@ -25,11 +27,28 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       yield MovieLoadingState();
       try {
         final movie = await _movieRepository.getMovieDetails(event.movieId);
+        final List<RatedMovie> ratedMovies = await _movieRepository.getRatedMovies();
         final List<MovieReview> reviews =
             await _movieRepository.getMovieReviews(event.movieId);
         yield MovieDetailsScreenState(movie, reviews);
       } catch (e) {
         yield MovieErrorState('Failed to fetch movie details: $e');
+      }
+    } else if (event is RateMovieEvent) {
+      try {
+            await _movieRepository.rateMovie(event.movieId, event.rate);
+            yield MovieRatedState(event.movieId, event.rate);
+      } catch (e) {
+        yield MovieRatingErrorState(
+            event.movieId, 'Failed to rate movie details: $e');
+      }
+    } else if (event is DeleteRateMovieEvent) {
+      try {
+        await _movieRepository.deleteMovieRate(event.movieId);
+        yield MovieRateDeletedState(event.movieId);
+      } catch (e) {
+        yield MovieRatingErrorState(
+            event.movieId, 'Failed to rate movie details: $e');
       }
     }
   }

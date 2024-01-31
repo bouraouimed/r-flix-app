@@ -8,6 +8,7 @@ import '../../logic/bloc/movie_event.dart';
 import '../../logic/bloc/movie_state.dart';
 import '../../logic/model/movie.dart';
 import '../../logic/repository/movie_respository.dart';
+import '../widgets/widgets.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -15,18 +16,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late MovieBloc _movieBloc;
+  late List<Movie> _movies = <Movie>[];
+  late List<Genre> _genres = <Genre>[];
+
+  bool _isLoading = true;
+  String _errorMsg = '';
 
   @override
   void initState() {
     super.initState();
-    _movieBloc = MovieBloc(TMDBMovieRepository());
-    _movieBloc.add(FetchMoviesEvent());
   }
 
   @override
   void dispose() {
-    _movieBloc.close();
     super.dispose();
   }
 
@@ -37,22 +39,43 @@ class _HomePageState extends State<HomePage> {
         title: Text('Movie List'),
       ),
       body: BlocProvider(
-        create: (_) => _movieBloc,
-        child: BlocBuilder<MovieBloc, MovieState>(
-          builder: (context, state) {
-            Widget content;
-            if (state is MovieLoadingState) {
-              content = Center(child: CircularProgressIndicator());
-            } else if (state is MovieLoadedState) {
-              content = _buildMovieList(state.movies, state.genres);
-            } else if (state is MovieErrorState) {
-              content = Center(child: Text('Error: ${state.error}'));
-            } else {
-              content = Container();
-            }
-            return content;
-          },
-        ),
+        create: (_) => MovieBloc(TMDBMovieRepository())
+          ..add(
+            FetchMoviesEvent(),
+          ),
+        child: BlocListener<MovieBloc, MovieState>(listener: (context, state) {
+          if (state is MovieLoadingState) {
+            _isLoading = true;
+            _errorMsg = '';
+            _movies = <Movie>[];
+            _genres = <Genre>[];
+          } else if (state is MovieLoadedState) {
+            setState(() {
+              _isLoading = false;
+              _errorMsg = '';
+              _movies = state.movies;
+              _genres = state.genres;
+            });
+          } else if (state is MovieRatedState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content:
+                    Text('Movie ${state.movieId} rated to ${state.rate}')));
+          } else if (state is MovieRateDeletedState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content:
+                Text('Movie rate ${state.movieId} deleted!')));
+          }
+          else if (state is MovieErrorState) {
+            setState(() {
+              _errorMsg = state.error.toString();
+            });
+          } else if (state is MovieRatingErrorState) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('Unable to rate movie')));
+          }
+        }, child: BlocBuilder<MovieBloc, MovieState>(builder: (context, state) {
+          return _buildMovieList();
+        })),
       ),
       // ),
     );
@@ -68,66 +91,82 @@ class _HomePageState extends State<HomePage> {
         .join(', ');
   }
 
-  Widget _buildMovieList(List<Movie> movies, List<Genre> genres) {
-    return ListView.builder(
-      itemCount:
-          movies.length > MAX_MOVIES_LENGTH ? MAX_MOVIES_LENGTH : movies.length,
-      itemBuilder: (context, index) {
-        final movie = movies[index];
+  Widget _buildMovieList() {
+    // List<Movie> movies, List<Genre> genres
+    return Stack(
+      children: [
+        ListView.builder(
+          itemCount: this._movies.length > MAX_MOVIES_LENGTH
+              ? MAX_MOVIES_LENGTH
+              : this._movies.length,
+          itemBuilder: (context, index) {
+            final movie = this._movies[index];
 
-        return Card(
-          margin: EdgeInsets.all(8.0),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MovieDetailsScreen(movie.id),
-                ),
-              );
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Movie Poster
-                Image.network(
-                  'https://image.tmdb.org/t/p/w200${movie.posterPath}',
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                // Movie Title
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    movie.title,
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
+            return Card(
+              margin: EdgeInsets.all(8.0),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MovieDetailsScreen(movie.id),
                     ),
-                  ),
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Movie Poster
+                    Image.network(
+                      'https://image.tmdb.org/t/p/w200${movie.posterPath}',
+                      height: 150,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                    // Movie Title
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        movie.title,
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    // Year of Release
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        'Release Year: ${movie.releaseDate.substring(0, 4)}',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ),
+                    // Genres
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        'Genres: ${_getGenreNames(movie.genreIds ?? [], _genres)}',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ),
+                    SizedBox(height: 20.0),
+                    MovieRating(
+                        movie: movie,
+                        actionsExtend: true
+                    ),
+                    SizedBox(height: 16.0),
+                  ],
                 ),
-                // Year of Release
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    'Release Year: ${movie.releaseDate.substring(0, 4)}',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                ),
-                // Genres
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    'Genres: ${_getGenreNames(movie.genreIds ?? [], genres)}',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+              ),
+            );
+          },
+        ),
+        _isLoading ? Center(child: CircularProgressIndicator()) : Container(),
+        _errorMsg.isNotEmpty
+            ? Center(child: Text('Error: ${_errorMsg}'))
+            : Container(),
+      ],
     );
   }
 }

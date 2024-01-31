@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 import '../../constants/constants.dart';
 import '../../logic/bloc/movie_bloc.dart';
@@ -7,49 +8,74 @@ import '../../logic/bloc/movie_event.dart';
 import '../../logic/bloc/movie_state.dart';
 import '../../logic/model/movie.dart';
 import '../../logic/repository/movie_respository.dart';
+import '../widgets/widgets.dart';
 
-class MovieDetailsScreen extends StatelessWidget {
+class MovieDetailsScreen extends StatefulWidget {
   final int movieId;
 
   MovieDetailsScreen(this.movieId);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MovieBloc(TMDBMovieRepository()),
-      child: MovieDetailsScreenContent(movieId),
-    );
-  }
+  State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
 }
 
-class MovieDetailsScreenContent extends StatelessWidget {
-  final int movieId;
+class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
+  Movie? _movie;
+  late List<MovieReview> _reviews = <MovieReview>[];
 
-  MovieDetailsScreenContent(this.movieId);
+  bool _isLoading = true;
+  String _errorMsg = '';
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final movieDetailsBloc = BlocProvider.of<MovieBloc>(context);
-
-    // Trigger the loading of movie details when the screen is first built
-    movieDetailsBloc.add(NavigateToMovieDetailsEvent(movieId));
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Movie Details'),
-      ),
-      body: BlocBuilder<MovieBloc, MovieState>(
-        builder: (context, state) {
+    return BlocProvider(
+      create: (context) => MovieBloc(TMDBMovieRepository())
+        ..add(NavigateToMovieDetailsEvent(widget.movieId)),
+      child: BlocListener<MovieBloc, MovieState>(
+        listener: (context, state) {
           if (state is MovieLoadingState) {
-            return Center(child: CircularProgressIndicator());
+            setState(() {
+              _isLoading = true;
+              _errorMsg = '';
+            });
           } else if (state is MovieDetailsScreenState) {
-            return _buildContent(state.movie, state.reviews);
-          } else if (state is MovieErrorState) {
-            return Center(child: Text('Error: ${state.error}'));
-          } else {
-            return Container(); // You can customize this case based on your needs
+            setState(() {
+              _isLoading = false;
+              _movie = state.movie;
+              _reviews = state.reviews;
+              _errorMsg = '';
+            });
+          } else if (state is MovieRatedState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content:
+                    Text('Movie ${state.movieId} rated to ${state.rate}')));
+          } else if (state is MovieRateDeletedState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content:
+                Text('Movie rate ${state.movieId} deleted!')));
+          }
+          else if (state is MovieRatingErrorState) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content:
+                Text('Unable to rate movie ${state.movieId}')));
+
           }
         },
+        child: BlocBuilder<MovieBloc, MovieState>(
+          builder: (context, state) {
+            return _buildContent();
+          },
+        ),
       ),
     );
   }
@@ -114,80 +140,108 @@ class MovieDetailsScreenContent extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(Movie movie, List<MovieReview> reviews) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Your UI code here based on the Movie object
-          SingleChildScrollView(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.network(
-                  'https://image.tmdb.org/t/p/w500${movie.posterPath}',
-                  height: 200,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(height: 16.0),
-                Text(
-                  'Year of Release: ${DateTime.parse(movie.releaseDate).year}',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                SizedBox(height: 8.0),
-                // Text(
-                //   'Genres: ${_getGenresString(movie.genres)}',
-                //   style: TextStyle(fontSize: 16.0),
-                // ),
-                // SizedBox(height: 8.0),
-                _buildLink('Homepage', movie.homepage ?? ''),
-                _buildLink(
-                    'IMDb Page', 'https://www.imdb.com/title/${movie.id}'),
-                SizedBox(height: 16.0),
-                Text(
-                  'Overview:',
-                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 8.0),
-                Text(
-                  movie.overview,
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                SizedBox(height: 16.0),
-                Text(
-                  'Running Time: ${movie.runtime} minutes',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                SizedBox(height: 16.0),
-                Text(
-                  'Production Companies:',
-                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children:
-                      _buildProductionCompanies(movie.productionCompanies) ??
-                          [],
-                ),
-                ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  physics: BouncingScrollPhysics(),
-                  itemCount: reviews.length > MAX_REVIEWS_COUNT
-                      ? MAX_REVIEWS_COUNT
-                      : reviews.length,
-                  itemBuilder: (context, index) {
-                    return _buildReviewCard(context, reviews[index]);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  String _displayGenreNames(genres) {
+    return genres.map((genre) => genre.name).join(', ');
+  }
+
+  Widget _buildContent() {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Movie Details'),
+        ),
+        body: Stack(children: [
+          _isLoading ? Center(child: CircularProgressIndicator()) : Container(),
+          _errorMsg.isNotEmpty
+              ? Center(child: Text('Error: ${_errorMsg}'))
+              : Container(),
+          !_isLoading
+              ? SingleChildScrollView(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Your UI code here based on the Movie object
+                      SingleChildScrollView(
+                        padding: EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Image.network(
+                              'https://image.tmdb.org/t/p/w500${_movie?.posterPath}',
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                            SizedBox(height: 16.0),
+                            Text(
+                              'Year of Release: ${DateTime.parse(_movie!.releaseDate).year}',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              'Genres: ${_displayGenreNames(_movie!.genres)}',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            SizedBox(height: 8.0),
+                            _buildLink('Homepage', _movie?.homepage ?? ''),
+                            _buildLink('IMDb Page',
+                                'https://www.imdb.com/title/${_movie?.id}'),
+                            SizedBox(height: 16.0),
+                            Text(
+                              'Overview:',
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              _movie?.overview ?? '',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            SizedBox(height: 16.0),
+                            Text(
+                              'Running Time: ${_movie?.runtime} minutes',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            SizedBox(height: 16.0),
+                            Text(
+                              'Production Companies:',
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: _buildProductionCompanies(
+                                      _movie?.productionCompanies) ??
+                                  [],
+                            ),
+                            SizedBox(height: 20.0),
+                            MovieRating(movie: _movie, actionsExtend: false),
+                            SizedBox(height: 16.0),
+                            Text(
+                              'Users reviews',
+                              style: TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.bold),
+                            ),
+
+                            ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              shrinkWrap: true,
+                              physics: BouncingScrollPhysics(),
+                              itemCount: _reviews.length > MAX_REVIEWS_COUNT
+                                  ? MAX_REVIEWS_COUNT
+                                  : _reviews.length,
+                              itemBuilder: (context, index) {
+                                return _buildReviewCard(
+                                    context, _reviews[index]);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Center(child: CircularProgressIndicator())
+        ]));
   }
 }

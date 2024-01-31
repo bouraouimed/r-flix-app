@@ -305,6 +305,48 @@ class Movie {
   }
 }
 
+class RatedMovie {
+  final int id;
+  final double rating;
+
+  RatedMovie({
+    required this.id,
+    required this.rating,
+  });
+
+  factory RatedMovie.fromJson(Map<String, dynamic> json) {
+    return RatedMovie(
+      id: json['id'],
+      rating: json['rating'],
+    );
+  }
+}
+
+class RatedMovieResponse {
+  final List<RatedMovie> results;
+  final int totalPages;
+  final int totalResults;
+  final int page;
+
+  RatedMovieResponse({
+    required this.page,
+    required this.results,
+    required this.totalPages,
+    required this.totalResults,
+  });
+
+  factory RatedMovieResponse.fromJson(Map<String, dynamic> json) {
+    return RatedMovieResponse(
+      page: json['page'],
+      results: List<RatedMovie>.from(
+        json['results'].map((result) => RatedMovie.fromJson(result)),
+      ),
+      totalPages: json['total_pages'],
+      totalResults: json['total_results'],
+    );
+  }
+}
+
 class GenreResponse {
   final List<Genre> results;
 
@@ -414,7 +456,31 @@ class AuthorDetails {
       name: json['name'],
       username: json['username'],
       avatarPath: json['avatar_path'],
-      rating: json['rating']?? 0.toDouble(),
+      rating: json['rating'] ?? 0.toDouble(),
     );
   }
+}
+
+class MovieRatingResponse {
+  bool? success;
+  int status_code;
+  String status_message;
+
+  MovieRatingResponse(
+      {this.success, required this.status_code, required this.status_message});
+
+  factory MovieRatingResponse.fromJson(Map<String, dynamic> json) {
+    return MovieRatingResponse(
+        success: json['success'] ?? false,
+        status_code: json['status_code'],
+        status_message: json['status_message']);
+  }
+
+  Map<String, dynamic> toJson() => {
+        "success": success,
+        "status_code": status_code,
+        "status_message": status_message,
+      };
+
+  List<Object?> get props => [success, status_code, status_message];
 }

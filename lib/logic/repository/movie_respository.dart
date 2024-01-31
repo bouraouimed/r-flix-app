@@ -41,6 +41,32 @@ class TMDBMovieRepository implements MovieRepository {
   }
 
   @override
+  Future<List<RatedMovie>> getRatedMovies() async {
+    try {
+      final response = await http.get(
+        Uri.parse(GET_RATED_MOVIES_URL),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final RatedMovieResponse ratedMoviesResponse =
+            RatedMovieResponse.fromJson(data);
+        return ratedMoviesResponse.results;
+      } else {
+        // Handle error
+        throw Exception('Failed to load rated movies');
+      }
+    } catch (e) {
+      // Handle exceptions
+      throw Exception('Error: $e');
+    }
+  }
+
+  @override
   Future<List<Genre>> getCategoryNames() async {
     try {
       final response = await http.get(
@@ -93,11 +119,11 @@ class TMDBMovieRepository implements MovieRepository {
   }
 
   Future<List<MovieReview>> getMovieReviews(int movieId) async {
-    final String get_movie_reviewws_url =
+    final String get_movie_reviews_url =
         GET_MOVIE_REVIEWS_URL.replaceAll('%ID', movieId.toString());
     try {
       final response = await http.get(
-        Uri.parse(get_movie_reviewws_url),
+        Uri.parse(get_movie_reviews_url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
@@ -115,6 +141,54 @@ class TMDBMovieRepository implements MovieRepository {
       // Handle exceptions
       throw Exception('Error: $e');
     }
+  }
 
+  Future<MovieRatingResponse> rateMovie(int movieId, double rate) async {
+    final String rate_movie_url =
+        RATE_MOVIE_URL.replaceAll('%ID', movieId.toString());
+    try {
+      final response = await http.post(Uri.parse(rate_movie_url),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
+          },
+          body: jsonEncode(<String, String>{'value': rate.toString()}));
+
+      if (response.statusCode == 201) {
+        final dynamic jsonData = json.decode(response.body);
+        return MovieRatingResponse.fromJson(jsonData);
+      } else {
+        // Handle error
+        throw Exception('Failed to rate movie $movieId');
+      }
+    } catch (e) {
+      // Handle exceptions
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<MovieRatingResponse> deleteMovieRate(int movieId) async {
+    final String rate_movie_url =
+        RATE_MOVIE_URL.replaceAll('%ID', movieId.toString());
+    try {
+      final response = await http.delete(
+        Uri.parse(rate_movie_url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic jsonData = json.decode(response.body);
+        return MovieRatingResponse.fromJson(jsonData);
+      } else {
+        // Handle error
+        throw Exception('Failed to delete rate movie $movieId');
+      }
+    } catch (e) {
+      // Handle exceptions
+      throw Exception('Error: $e');
+    }
   }
 }

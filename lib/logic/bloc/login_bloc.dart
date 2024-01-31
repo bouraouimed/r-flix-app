@@ -17,21 +17,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
     if (event is LoginButtonPressed) {
       yield LoginLoading();
-
-      try {
-        // Replace this with your own login logic
-        if (event is LoginButtonPressed) {
-          try {
-                await userRepository.login(event.email, event.password);
-                yield LoginSuccess();
-          } on Exception {
-            yield LoginFailure(error: 'Unable to login user');
+      if (event.email.isEmpty || event.password.isEmpty) {
+        yield LoginFailure(error: 'Unable to login user');
+      } else {
+        try {
+          // Replace this with your own login logic
+          if (event is LoginButtonPressed) {
+            try {
+              await userRepository.login(event.email, event.password);
+              yield LoginSuccess();
+            } on Exception {
+              yield LoginFailure(error: 'Unable to login user');
+            }
           }
+        } catch (error) {
+          yield LoginFailure(error: error.toString());
         }
-
-        yield LoginSuccess();
-      } catch (error) {
-        yield LoginFailure(error: error.toString());
       }
     }
   }

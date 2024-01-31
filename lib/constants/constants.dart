@@ -18,7 +18,7 @@ const String TMDB_LOGIN_REQUEST_TOKEN =
     '5af8e3830c24af17cdbfdc89e831ba3536c58240';
 
 const String TMDB_LOGIN_AUTHORIZATION_TOKEN =
-    'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxZGU1NzYzYmE4OTIyNGUwODJlM2I1MGJhNTAzZmYzZCIsInN1YiI6IjY1OWQ3N2ZhNzc3NmYwMDE0ODI5NWZiMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.qxM3IBBcrmUPJ6wIdZvOqUAsD9mUFRBknjhDBLYLjDo';
+    'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5YTlmYTk5NWIwYjFhNjZiYWZhZDVkMWQ1NjMwOTUwNSIsInN1YiI6IjY1OWQ3N2ZhNzc3NmYwMDE0ODI5NWZiMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.bUzr77PemeMBqlz178zQ4LKL0jpABm7xSQO3BFa7xZA';
 
 // list movies categories API
 const String GET_MOVIES_GENRES_API =
@@ -31,6 +31,9 @@ const String GET_FAVORITE_MOVIES_URL =
 // list of popular movies
 const String  GET_TOP_RATED_MOVIES_URL =
     '$TMDB_BASE_URL/movie/top_rated?language=en-US&page=1';
+
+// Movies search URL
+const String SEARCH_MOVIES_URL = '$TMDB_BASE_URL/search/movie?include_adult=false&language=en-US&page=1&query=%QUERY';
 
 // list of rated movies API
 const String GET_RATED_MOVIES_URL =

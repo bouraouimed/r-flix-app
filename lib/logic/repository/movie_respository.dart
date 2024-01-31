@@ -9,6 +9,8 @@ abstract class MovieRepository {
 
   Future<List<Movie>> getTopRatedMovies();
 
+  Future<List<Movie>> getUserRatedMovies();
+
   Future<List<Genre>> getCategoryNames();
 
   Future<Movie> getMovieDetails(int id);
@@ -67,7 +69,7 @@ class TMDBMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<List<RatedMovie>> getRatedMovies() async {
+  Future<List<RatedMovie>> getRatedMoviesIds() async {
     try {
       final response = await http.get(
         Uri.parse(GET_RATED_MOVIES_URL),
@@ -85,6 +87,31 @@ class TMDBMovieRepository implements MovieRepository {
       } else {
         // Handle error
         throw Exception('Failed to load rated movies');
+      }
+    } catch (e) {
+      // Handle exceptions
+      throw Exception('Error: $e');
+    }
+  }
+
+  @override
+  Future<List<Movie>> getUserRatedMovies() async {
+    try {
+      final response = await http.get(
+        Uri.parse(GET_RATED_MOVIES_URL),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $TMDB_LOGIN_AUTHORIZATION_TOKEN',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final MovieResponse movieResponse = MovieResponse.fromJson(data);
+        return movieResponse.results;
+      } else {
+        // Handle error
+        throw Exception('Failed to load movies');
       }
     } catch (e) {
       // Handle exceptions

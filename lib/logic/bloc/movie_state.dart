@@ -16,25 +16,37 @@ class MovieLoadingState extends MovieState {}
 class PopularMoviesLoadedState extends MovieState {
   final List<Movie> popularMovies;
   final List<Genre> genres;
-  final List<RatedMovie> ratedMovies;
+  final List<RatedMovie> UserRatedMoviesIds;
 
   const PopularMoviesLoadedState(
-      this.popularMovies, this.genres, this.ratedMovies);
+      this.popularMovies, this.genres, this.UserRatedMoviesIds);
 
   @override
-  List<Object?> get props => [popularMovies, genres, ratedMovies];
+  List<Object?> get props => [popularMovies, genres, UserRatedMoviesIds];
 }
 
 class TopRatedMoviesLoadedState extends MovieState {
   final List<Movie> topRatedMovies;
   final List<Genre> genres;
-  final List<RatedMovie> ratedMovies;
+  final List<RatedMovie> UserRatedMoviesIds;
 
   const TopRatedMoviesLoadedState(
-      this.topRatedMovies, this.genres, this.ratedMovies);
+      this.topRatedMovies, this.genres, this.UserRatedMoviesIds);
 
   @override
-  List<Object?> get props => [topRatedMovies, genres, ratedMovies];
+  List<Object?> get props => [topRatedMovies, genres, UserRatedMoviesIds];
+}
+
+class UserRatedMoviesLoadedState extends MovieState {
+  final List<Movie> userRatedMovies;
+  final List<Genre> genres;
+  final List<RatedMovie> UserRatedMoviesIds;
+
+  const UserRatedMoviesLoadedState(
+      this.userRatedMovies, this.genres, this.UserRatedMoviesIds);
+
+  @override
+  List<Object?> get props => [userRatedMovies, genres, UserRatedMoviesIds];
 }
 
 

@@ -10,6 +10,10 @@ class FetchTopRatedMoviesEvent extends MovieEvent {
   List<Object?> get props => [];
 }
 
+class FetchUserRatedMoviesEvent extends MovieEvent {
+  List<Object?> get props => [];
+}
+
 
 class NavigateToMovieDetailsEvent extends MovieEvent {
   final int movieId;

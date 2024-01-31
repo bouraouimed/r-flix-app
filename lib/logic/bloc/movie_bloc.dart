@@ -16,7 +16,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       yield MovieLoadingState();
       try {
         final List<Movie> popularMovies = await _movieRepository.getPopularMovies();
-        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMovies();
+        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMoviesIds();
 
         final List<Genre> genres = await _movieRepository.getCategoryNames();
         yield PopularMoviesLoadedState(popularMovies, genres, ratedMoviesIds);
@@ -27,10 +27,22 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       yield MovieLoadingState();
       try {
         final List<Movie> topRatedMovies = await _movieRepository.getTopRatedMovies();
-        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMovies();
+        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMoviesIds();
 
         final List<Genre> genres = await _movieRepository.getCategoryNames();
         yield TopRatedMoviesLoadedState(topRatedMovies, genres, ratedMoviesIds);
+      } catch (e) {
+        yield MovieErrorState('Failed to fetch movies');
+      }
+    }
+    else if(event is FetchUserRatedMoviesEvent) {
+      yield MovieLoadingState();
+      try {
+        final List<Movie> userRatedMovies = await _movieRepository.getUserRatedMovies();
+        final List<RatedMovie> ratedMoviesIds = await _movieRepository.getRatedMoviesIds();
+
+        final List<Genre> genres = await _movieRepository.getCategoryNames();
+        yield UserRatedMoviesLoadedState(userRatedMovies, genres, ratedMoviesIds);
       } catch (e) {
         yield MovieErrorState('Failed to fetch movies');
       }
@@ -39,7 +51,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       yield MovieLoadingState();
       try {
         final movie = await _movieRepository.getMovieDetails(event.movieId);
-        final List<RatedMovie> ratedMovies = await _movieRepository.getRatedMovies();
+        final List<RatedMovie> ratedMovies = await _movieRepository.getRatedMoviesIds();
         final List<MovieReview> reviews =
             await _movieRepository.getMovieReviews(event.movieId);
         yield MovieDetailsScreenState(movie, reviews, ratedMovies);

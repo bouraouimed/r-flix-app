@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
               _errorMsg = '';
               _movies = state.popularMovies;
               _genres = state.genres;
-              _userRatedMoviesIds = state.ratedMovies;
+              _userRatedMoviesIds = state.UserRatedMoviesIds;
             });
           } else if (state is TopRatedMoviesLoadedState) {
             setState(() {
@@ -67,9 +67,18 @@ class _HomePageState extends State<HomePage> {
               _errorMsg = '';
               _movies = state.topRatedMovies;
               _genres = state.genres;
-              _userRatedMoviesIds = state.ratedMovies;
+              _userRatedMoviesIds = state.UserRatedMoviesIds;
             });
-          } else if (state is MovieRatedState) {
+          } else if (state is UserRatedMoviesLoadedState) {
+            setState(() {
+              _isLoading = false;
+              _errorMsg = '';
+              _movies = state.userRatedMovies;
+              _genres = state.genres;
+              _userRatedMoviesIds = state.UserRatedMoviesIds;
+            });
+          }
+          else if (state is MovieRatedState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content:
                     Text('Movie ${state.movieId} rated to ${state.rate}')));
@@ -138,7 +147,7 @@ class _HomePageState extends State<HomePage> {
         } else if (_selectedButton == 'Top-Rated') {
           movieBloc.add(FetchTopRatedMoviesEvent());
         } else if (_selectedButton == 'My Ratings') {
-          movieBloc.add(FetchTopRatedMoviesEvent());
+          movieBloc.add(FetchUserRatedMoviesEvent());
         }
       },
       style: ElevatedButton.styleFrom(

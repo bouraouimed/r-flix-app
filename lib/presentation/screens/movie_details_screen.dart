@@ -8,7 +8,7 @@ import '../../logic/bloc/movie_event.dart';
 import '../../logic/bloc/movie_state.dart';
 import '../../logic/model/movie.dart';
 import '../../logic/repository/movie_respository.dart';
-import '../widgets/widgets.dart';
+import '../widgets/rating.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final int movieId;
@@ -22,6 +22,7 @@ class MovieDetailsScreen extends StatefulWidget {
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   Movie? _movie;
   late List<MovieReview> _reviews = <MovieReview>[];
+  late List<RatedMovie> _userRatedMovies = <RatedMovie>[];
 
   bool _isLoading = true;
   String _errorMsg = '';
@@ -47,12 +48,15 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             setState(() {
               _isLoading = true;
               _errorMsg = '';
+              _reviews = <MovieReview>[];
+              _userRatedMovies = <RatedMovie>[];
             });
           } else if (state is MovieDetailsScreenState) {
             setState(() {
               _isLoading = false;
               _movie = state.movie;
               _reviews = state.reviews;
+              _userRatedMovies = state.ratedMovies;
               _errorMsg = '';
             });
           } else if (state is MovieRatedState) {
@@ -215,7 +219,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                   [],
                             ),
                             SizedBox(height: 20.0),
-                            MovieRating(movie: _movie, actionsExtend: false),
+                            MovieRating(movie: _movie, actionsExtend: false, userRatedMovies: _userRatedMovies),
                             SizedBox(height: 16.0),
                             Text(
                               'Users reviews',

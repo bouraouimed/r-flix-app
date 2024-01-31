@@ -10,21 +10,32 @@ import '../../logic/repository/movie_respository.dart';
 
 class MovieRating extends StatefulWidget {
   final Movie? movie;
+  final List<RatedMovie>? userRatedMovies;
   final bool actionsExtend;
 
   @override
   State<MovieRating> createState() => _MovieRatingState();
 
-  const MovieRating({this.movie, required this.actionsExtend});
+  const MovieRating(
+      {this.movie, this.userRatedMovies, required this.actionsExtend});
 }
 
 class _MovieRatingState extends State<MovieRating> {
   double? newRating = 0.0;
 
+  double getRateValue() {
+    int? movieID = this.widget.movie!.id;
+    for (RatedMovie ratedMovie in this.widget.userRatedMovies!) {
+      if (ratedMovie.id == movieID) {
+        // If the movieID is found in userRates, return its rating
+        return ratedMovie.rating;
+      }
+    }
+    return this.widget.movie!.voteAverage;
+  }
+
   @override
   Widget build(BuildContext context) {
-    double? rating = this.widget.movie?.voteAverage;
-
     return this.widget.movie != null
         ? BlocProvider(
             create: (context) => MovieBloc(TMDBMovieRepository()),
@@ -37,7 +48,7 @@ class _MovieRatingState extends State<MovieRating> {
               SizedBox(height: 8.0),
               Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                 RatingBar.builder(
-                  initialRating: rating! / 2,
+                  initialRating: getRateValue() / 2,
                   minRating: 1,
                   direction: Axis.horizontal,
                   allowHalfRating: true,
@@ -95,8 +106,7 @@ class _MovieRatingState extends State<MovieRating> {
                               color: Colors.white, // Change to desired color
                               onPressed: () {
                                 BlocProvider.of<MovieBloc>(context).add(
-                                    DeleteRateMovieEvent(
-                                        widget.movie!.id));
+                                    DeleteRateMovieEvent(widget.movie!.id));
                               },
                             ),
                           ),

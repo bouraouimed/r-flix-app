@@ -27,8 +27,9 @@ class MovieLoadedState extends MovieState {
 class MovieDetailsScreenState extends MovieState {
   final Movie movie;
   final List<MovieReview> reviews;
+  List<RatedMovie> ratedMovies;
 
-  MovieDetailsScreenState(this.movie, this.reviews);
+  MovieDetailsScreenState(this.movie, this.reviews, this.ratedMovies);
 }
 
 class MovieRatedState extends MovieState {

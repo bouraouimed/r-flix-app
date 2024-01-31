@@ -8,7 +8,7 @@ import '../../logic/bloc/movie_event.dart';
 import '../../logic/bloc/movie_state.dart';
 import '../../logic/model/movie.dart';
 import '../../logic/repository/movie_respository.dart';
-import '../widgets/widgets.dart';
+import '../widgets/rating.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late List<Movie> _movies = <Movie>[];
   late List<Genre> _genres = <Genre>[];
+  late List<RatedMovie> _userRatedMovies = <RatedMovie>[];
 
   bool _isLoading = true;
   String _errorMsg = '';
@@ -49,12 +50,14 @@ class _HomePageState extends State<HomePage> {
             _errorMsg = '';
             _movies = <Movie>[];
             _genres = <Genre>[];
+            _userRatedMovies = <RatedMovie>[];
           } else if (state is MovieLoadedState) {
             setState(() {
               _isLoading = false;
               _errorMsg = '';
               _movies = state.movies;
               _genres = state.genres;
+              _userRatedMovies = state.ratedMovies;
             });
           } else if (state is MovieRatedState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -62,10 +65,8 @@ class _HomePageState extends State<HomePage> {
                     Text('Movie ${state.movieId} rated to ${state.rate}')));
           } else if (state is MovieRateDeletedState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content:
-                Text('Movie rate ${state.movieId} deleted!')));
-          }
-          else if (state is MovieErrorState) {
+                content: Text('Movie rate ${state.movieId} deleted!')));
+          } else if (state is MovieErrorState) {
             setState(() {
               _errorMsg = state.error.toString();
             });
@@ -152,8 +153,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                     SizedBox(height: 20.0),
                     MovieRating(
-                        movie: movie,
-                        actionsExtend: true
+                      movie: movie,
+                      actionsExtend: true,
+                      userRatedMovies: _userRatedMovies,
                     ),
                     SizedBox(height: 16.0),
                   ],

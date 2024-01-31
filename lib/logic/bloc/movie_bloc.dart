@@ -30,7 +30,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         final List<RatedMovie> ratedMovies = await _movieRepository.getRatedMovies();
         final List<MovieReview> reviews =
             await _movieRepository.getMovieReviews(event.movieId);
-        yield MovieDetailsScreenState(movie, reviews);
+        yield MovieDetailsScreenState(movie, reviews, ratedMovies);
       } catch (e) {
         yield MovieErrorState('Failed to fetch movie details: $e');
       }

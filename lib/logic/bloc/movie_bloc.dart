@@ -81,8 +81,8 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       final List<Genre> genres = await _movieRepository.getCategoryNames();
 
       final suggestions = searchResults
-          .where((movie) => movie.title.contains(event.query))
-          .toList();
+          .map((movie) => movie.title)
+          .toSet().toList();
 
       yield MovieSearchState(suggestions, searchResults, genres, ratedMoviesIds);
 

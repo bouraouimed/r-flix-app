@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late List<Movie> _movies = <Movie>[];
   late List<Genre> _genres = <Genre>[];
-  late List<Movie> _searchSuggestions = <Movie>[];
+  late List<String> _searchSuggestions = <String>[];
 
   late List<RatedMovie> _userRatedMoviesIds = <RatedMovie>[];
 
@@ -187,6 +187,25 @@ class _HomePageState extends State<HomePage> {
             prefixIcon: Icon(Icons.search),
           ),
         ),
+        _searchSuggestions.isEmpty
+            ? Container()
+            : DropdownButton<String>(
+                isExpanded: true,
+                value: _searchSuggestions.first,
+                items: _searchSuggestions.map((movieTitle) {
+                  return DropdownMenuItem<String>(
+                    value: movieTitle,
+                    child: Text(movieTitle),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _searchController?.text = value!;
+                    movieBloc.add(SearchTextChanged(value!));
+                  });
+                },
+                hint: Text('Select a movie'),
+              )
       ]),
     );
   }

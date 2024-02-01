@@ -50,7 +50,7 @@ class UserRatedMoviesLoadedState extends MovieState {
 }
 
 class MovieSearchState extends MovieState {
-  final List<Movie> suggestions;
+  final List<String> suggestions;
   final List<Movie> searchResults;
   final List<Genre> genres;
   final List<RatedMovie> UserRatedMoviesIds;

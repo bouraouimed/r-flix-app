@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:r_flix_app/presentation/screens/movie_details_screen.dart';
 
 import '../../constants/constants.dart';
@@ -191,25 +192,35 @@ class _HomePageState extends State<HomePage> {
         ),
         _searchSuggestions.isEmpty
             ? Container()
-            : DropdownButton<String>(
-                isExpanded: true,
-                value: _searchSuggestions.first,
-                items: _searchSuggestions.map((movieTitle) {
-                  return DropdownMenuItem<String>(
-                    value: movieTitle,
-                    child: Text(movieTitle),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _searchController?.text = value!;
-                    if (_searchController!.text.isNotEmpty) {
-                      movieBloc.add(SearchTextChanged(value!));
-                    }
-                  });
-                },
-                hint: Text('Select a movie'),
-              )
+            : TypeAheadField<String>(
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: _searchController,
+            decoration: InputDecoration(
+              hintText: 'Select a movie',
+            ),
+          ),
+          suggestionsCallback: (pattern) {
+            // Implement your logic to fetch movie suggestions based on the pattern
+            // For example, you can filter the _searchSuggestions list
+            return _searchSuggestions
+                .where((movieTitle) =>
+                movieTitle.toLowerCase().contains(pattern.toLowerCase()))
+                .toList();
+          },
+          itemBuilder: (context, suggestion) {
+            return ListTile(
+              title: Text(suggestion),
+            );
+          },
+          onSuggestionSelected: (suggestion) {
+            setState(() {
+              _searchController?.text = suggestion;
+              if (_searchController!.text.isNotEmpty) {
+                movieBloc.add(SearchTextChanged(suggestion));
+              }
+            });
+          },
+        )
       ]),
     );
   }

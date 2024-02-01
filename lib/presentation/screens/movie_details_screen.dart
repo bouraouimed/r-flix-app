@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:r_flix_app/presentation/screens/webview_screen.dart';
 
 import '../../constants/constants.dart';
 import '../../logic/bloc/movie_bloc.dart';
@@ -65,14 +66,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     Text('Movie ${state.movieId} rated to ${state.rate}')));
           } else if (state is MovieRateDeletedState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content:
-                Text('Movie rate ${state.movieId} deleted!')));
-          }
-          else if (state is MovieRatingErrorState) {
+                content: Text('Movie rate ${state.movieId} deleted!')));
+          } else if (state is MovieRatingErrorState) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content:
-                Text('Unable to rate movie ${state.movieId}')));
-
+                content: Text('Unable to rate movie ${state.movieId}')));
           }
         },
         child: BlocBuilder<MovieBloc, MovieState>(
@@ -94,26 +91,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   }
 
   Widget _buildLink(String title, String url) {
-    //   WebViewController controller = WebViewController()
-    //     ..setJavaScriptMode(JavaScriptMode.unrestricted)
-    //     ..setBackgroundColor(const Color(0x00000000))
-    //     ..setNavigationDelegate(
-    //       NavigationDelegate(
-    //         onProgress: (int progress) {
-    //           // Update loading bar.
-    //         },
-    //         onPageStarted: (String url) {},
-    //         onPageFinished: (String url) {},
-    //         onWebResourceError: (WebResourceError error) {},
-    //         onNavigationRequest: (NavigationRequest request) {
-    //           return NavigationDecision.navigate;
-    //         },
-    //       ),
-    //     )
-    //     ..loadRequest(Uri.parse(url.toString()));
-
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyWebView(url: url, pageTitle: title)),
+        );
+      },
       // child: WebViewWidget(controller: controller),
       child: Text(
         '$title: $url',
@@ -189,7 +174,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             SizedBox(height: 8.0),
                             _buildLink('Homepage', _movie?.homepage ?? ''),
                             _buildLink('IMDb Page',
-                                'https://www.imdb.com/title/${_movie?.id}'),
+                                'https://www.imdb.com/title/${_movie?.imdbId ?? ''}'),
                             SizedBox(height: 16.0),
                             Text(
                               'Overview:',
@@ -219,14 +204,16 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                   [],
                             ),
                             SizedBox(height: 20.0),
-                            MovieRating(movie: _movie, actionsExtend: false, userRatedMovies: _userRatedMovies),
+                            MovieRating(
+                                movie: _movie,
+                                actionsExtend: false,
+                                userRatedMovies: _userRatedMovies),
                             SizedBox(height: 16.0),
                             Text(
                               'Users reviews',
                               style: TextStyle(
                                   fontSize: 20.0, fontWeight: FontWeight.bold),
                             ),
-
                             ListView.builder(
                               scrollDirection: Axis.vertical,
                               shrinkWrap: true,

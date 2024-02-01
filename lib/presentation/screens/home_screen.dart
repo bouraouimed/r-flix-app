@@ -180,7 +180,9 @@ class _HomePageState extends State<HomePage> {
         TextField(
           controller: _searchController,
           onChanged: (query) {
-            movieBloc.add(SearchTextChanged(query));
+            if(query.isNotEmpty) {
+              movieBloc.add(SearchTextChanged(query));
+            }
           },
           decoration: InputDecoration(
             labelText: 'Search for movies...',
@@ -201,7 +203,9 @@ class _HomePageState extends State<HomePage> {
                 onChanged: (value) {
                   setState(() {
                     _searchController?.text = value!;
-                    movieBloc.add(SearchTextChanged(value!));
+                    if (_searchController!.text.isNotEmpty) {
+                      movieBloc.add(SearchTextChanged(value!));
+                    }
                   });
                 },
                 hint: Text('Select a movie'),
